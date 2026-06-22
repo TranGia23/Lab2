@@ -1,7 +1,7 @@
 KHO LẠNH THÔNG MINH AIoT
 Hệ thống giám sát – dự đoán – cảnh báo bằng AI + IoT
-1. 🧠 Tổng quan hệ thống
-🎯 Mục tiêu
+1.  Tổng quan hệ thống
+ Mục tiêu
 
 Xây dựng hệ thống AIoT giúp:
 
@@ -9,7 +9,7 @@ Giám sát môi trường kho lạnh theo thời gian thực
 Dự đoán nguy cơ mất lạnh trước khi xảy ra
 Cảnh báo tự động & ghi nhật ký quyết định
 Triển khai AI dưới dạng API để tích hợp thực tế
-🧩 Kiến trúc tổng thể
+ Kiến trúc tổng thể
 [Cảm biến IoT]
    ↓
 [Gateway / MQTT / HTTP]
@@ -25,7 +25,7 @@ Triển khai AI dưới dạng API để tích hợp thực tế
 [Prediction + Decision Engine]
    ↓
 [Alert + Log + Dashboard]
-2. 📂 Cấu trúc dự án
+2. Cấu trúc dự án
 smart_cold_storage_aiot/
 │
 ├── data/
@@ -46,10 +46,10 @@ smart_cold_storage_aiot/
 ├── docs/                    # tài liệu
 ├── README.md
 └── requirements.txt
-3. 📊 Tập dữ liệu
-📁 File chính
+3. Tập dữ liệu
+ File chính
 data/raw/cold_storage_raw.csv
-📌 Các thuộc tính
+Các thuộc tính
 Thuộc tính	Ý nghĩa
 temperature	Nhiệt độ kho (°C)
 humidity	Độ ẩm (%)
@@ -58,8 +58,8 @@ door_open	Trạng thái cửa (0/1)
 power_usage	Điện năng tiêu thụ
 vibration	Rung động máy nén
 cooling_risk	Nhãn (0 = bình thường, 1 = nguy hiểm)
-4. ⚙️ Xử lý dữ liệu
-🧹 Các bước
+4.  Xử lý dữ liệu
+Các bước
 1. Làm sạch dữ liệu
 Xóa dữ liệu trùng (drop_duplicates)
 Chuẩn hóa timestamp
@@ -69,7 +69,7 @@ Sắp xếp theo thời gian
 Nội suy theo thời gian
 3. Chuẩn hóa dữ liệu
 StandardScaler hoặc MinMaxScaler
-🔧 Feature Engineering
+Feature Engineering
 
 Tạo đặc trưng mới:
 
@@ -77,20 +77,20 @@ temp_diff → thay đổi nhiệt độ
 rolling_mean_temp → trung bình trượt
 door_open_duration
 energy_per_temp
-📤 Output
+ Output
 data/processed/telemetry_clean.csv
 data/processed/feature_dataset.csv
-5. 🤖 Mô hình AI
-🎯 Bài toán
+5.  Mô hình AI
+ Bài toán
 
 Phân loại nguy cơ mất lạnh (Binary Classification)
 
-🧠 Model sử dụng
+Model sử dụng
 Logistic Regression
-🔀 Train/Test split
+ Train/Test split
 75% Train
 25% Test
-📈 Đánh giá
+ Đánh giá
 
 Các chỉ số:
 
@@ -98,10 +98,10 @@ Accuracy
 Precision
 Recall
 F1-score
-💾 Output
+Output
 models/cold_storage_model.joblib
 outputs/metrics.json
-🔧 Code mẫu (train_model.py)
+Code mẫu (train_model.py)
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import joblib
@@ -112,12 +112,12 @@ model = LogisticRegression()
 model.fit(X_train, y_train)
 
 joblib.dump(model, "models/cold_storage_model.joblib")
-6. ⚠️ Phát hiện bất thường (Anomaly Detection)
-🎯 Mục tiêu
+6.  Phát hiện bất thường (Anomaly Detection)
+ Mục tiêu
 
 Phát hiện tình trạng bất thường trước khi AI dự đoán
 
-🔍 Phương pháp
+ Phương pháp
 1. Z-score
 Z = (x - mean) / std
 2. Ngưỡng phát hiện
