@@ -1,192 +1,128 @@
-KHO LẠNH THÔNG MINH AIoT
-Hệ thống giám sát – dự đoán – cảnh báo bằng AI + IoT
-1.  Tổng quan hệ thống
- Mục tiêu
+KHO LẠNH THÔNG MINH AIOT
+Hệ thống AIoT cho kho lạnh thông minh
+1. Giới thiệu
+Đề tài xây dựng trợ giúp AIoT hệ thống:
 
-Xây dựng hệ thống AIoT giúp:
-
-Giám sát môi trường kho lạnh theo thời gian thực
-Dự đoán nguy cơ mất lạnh trước khi xảy ra
-Cảnh báo tự động & ghi nhật ký quyết định
-Triển khai AI dưới dạng API để tích hợp thực tế
- Kiến trúc tổng thể
-[Cảm biến IoT]
+Giám sát kho lạnh bằng cảm biến IoT
+Dự đoán nguy cơ mất lạnh bằng AI
+Sinh cảnh báo và nhật ký quyết định
+Triển khai mô hình AI bằng FastAPI
+Hệ thống đường ống
+Raw Data
    ↓
-[Gateway / MQTT / HTTP]
+Clean Data
    ↓
-[Data Storage (CSV / DB)]
+Feature Engineering
    ↓
-[Data Processing + Feature Engineering]
+Train AI Model
    ↓
-[AI Model Training]
+Save Model
    ↓
-[Model Deployment (FastAPI)]
+FastAPI Deployment
    ↓
-[Prediction + Decision Engine]
-   ↓
-[Alert + Log + Dashboard]
-2. Cấu trúc dự án
+Prediction & Decision Layer
+Dự án cấu trúc
 smart_cold_storage_aiot/
 │
 ├── data/
-│   ├── raw/                 # dữ liệu gốc từ cảm biến
-│   └── processed/           # dữ liệu đã xử lý
+│   ├── raw/
+│   └── processed/
 │
-├── notebooks/               # phân tích & thử nghiệm
+├── notebooks/
 │
 ├── src/
-│   ├── app.py               # FastAPI server
-│   ├── train_model.py       # huấn luyện AI
-│   ├── data_utils.py        # xử lý dữ liệu
-│   ├── test_api.py          # test API
-│   └── check_outputs.py     # kiểm tra output
+│   ├── app.py
+│   ├── train_model.py
+│   ├── data_utils.py
+│   ├── test_api.py
+│   └── check_outputs.py
 │
-├── models/                  # lưu model
-├── outputs/                 # kết quả
-├── docs/                    # tài liệu
+├── models/
+│
+├── outputs/
+│
+├── docs/
+│
 ├── README.md
 └── requirements.txt
-3. Tập dữ liệu
- File chính
+2. Tập dữ liệu
+Tệp dữ liệu chính
 data/raw/cold_storage_raw.csv
-Các thuộc tính
-Thuộc tính	Ý nghĩa
-temperature	Nhiệt độ kho (°C)
-humidity	Độ ẩm (%)
-co2	Nồng độ CO2
-door_open	Trạng thái cửa (0/1)
-power_usage	Điện năng tiêu thụ
-vibration	Rung động máy nén
-cooling_risk	Nhãn (0 = bình thường, 1 = nguy hiểm)
-4.  Xử lý dữ liệu
-Các bước
-1. Làm sạch dữ liệu
-Xóa dữ liệu trùng (drop_duplicates)
-Chuẩn hóa timestamp
-Sắp xếp theo thời gian
-2. Xử lý thiếu dữ liệu
-Điền trung bình (mean)
-Nội suy theo thời gian
-3. Chuẩn hóa dữ liệu
-StandardScaler hoặc MinMaxScaler
-Feature Engineering
+Các trường dữ liệu
+Nhiệt độ
+Độ ẩm
+CO2
+Cửa mở
+Mức tiêu thụ điện năng
+Rung động máy nén
+Rủi ro làm mát
+3. Xử lý dữ liệu
+Tòa án thực hiện:
 
-Tạo đặc trưng mới:
-
-temp_diff → thay đổi nhiệt độ
-rolling_mean_temp → trung bình trượt
-door_open_duration
-energy_per_temp
- Output
+dữ liệu chồng chéo
+Xử lý giá trị bị thiếu
+Dấu thời gian Chuẩn
+Kỹ thuật đặc trưng
+Tạo bộ dữ liệu đặc trưng cho AI
+Đầu ra sinh ra
 data/processed/telemetry_clean.csv
 data/processed/feature_dataset.csv
-5.  Mô hình AI
- Bài toán
-
-Phân loại nguy cơ mất lạnh (Binary Classification)
-
-Model sử dụng
+4. Mô hình AI
+Người mẫu sử dụng
 Logistic Regression
- Train/Test split
-75% Train
-25% Test
- Đánh giá
-
-Các chỉ số:
-
-Accuracy
-Precision
-Recall
-F1-score
-Output
+Phân chia giai đoạn huấn luyện/kiểm tra
+75% Đào tạo
+Bài kiểm tra 25%
+Mô hình đầu ra
 models/cold_storage_model.joblib
 outputs/metrics.json
-Code mẫu (train_model.py)
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-import joblib
+5. Phát hiện bất thường
+thông qua sử dụng:
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-
-model = LogisticRegression()
-model.fit(X_train, y_train)
-
-joblib.dump(model, "models/cold_storage_model.joblib")
-6.  Phát hiện bất thường (Anomaly Detection)
- Mục tiêu
-
-Phát hiện tình trạng bất thường trước khi AI dự đoán
-
- Phương pháp
-1. Z-score
-Z = (x - mean) / std
-2. Ngưỡng phát hiện
-|Z| > 2.5 → bất thường
-📌 Các loại bất thường
-🌡️ Nhiệt độ tăng đột biến
-🌫️ CO2 tăng cao
-⚡ Điện năng bất thường
-🔊 Rung động lớn
-🛡️ Vai trò
-
-👉 Lớp bảo vệ trước AI
-👉 Tránh điều khiển sai hệ thống
-
-7. 🌐 Triển khai FastAPI
-▶️ Chạy server
+Sự bất thường về nhiệt độ
+Sự bất thường của CO2
+Phát hiện điểm Z
+điểm đến
+Phát hiện dữ liệu bất ngờ
+Hỗ trợ lớp an toàn
+Tránh điều khiển kho lạnh hệ thống
+6. Triển khai FastAPI
+Chạy API
 uvicorn src.app:app --reload --port 8001
-📄 Swagger UI
+Tài liệu Swagger
 http://127.0.0.1:8001/docs
-🔗 API Endpoints
-Endpoint	Chức năng
-/health	Kiểm tra API
-/model-info	Thông tin model
-/predict	Dự đoán
-🧠 Code mẫu (app.py)
-from fastapi import FastAPI
-import joblib
-
-app = FastAPI()
-model = joblib.load("models/cold_storage_model.joblib")
-
-@app.get("/health")
-def health():
-    return {"status": "OK"}
-
-@app.post("/predict")
-def predict(data: dict):
-    features = list(data.values())
-    prob = model.predict_proba([features])[0][1]
-    return {"probability": prob}
-8. 📦 Output hệ thống
+Điểm cuối API
+Điểm cuối	năng lượng
+/health	kiểm tra API
+/model-info	Mô hình thông tin
+/predict	Dự đoán AI
+7. Tệp đầu ra
 outputs/
-├── metrics.json        # độ chính xác model
-├── decision_log.csv    # log quyết định
-└── predictions.csv     # kết quả dự đoán
-9. 🧾 Quy tắc quyết định (Decision Engine)
-⚙️ Rule-based + AI
-🔴 Quy tắc 1 (Nguy hiểm cao)
+├── metrics.json
+├── decision_log.csv
+└── predictions.csv
+
+models/
+└── cold_storage_model.joblib
+8. Quy tắc quyết định
+Quy tắc 1
 anomaly_score > 2.5
-→ DỪNG hệ thống làm lạnh
-🟠 Quy tắc 2 (Nguy cơ)
+→ DỪNG_CHẾ ĐỘ ĐIỀU KHIỂN_T
+
+Quy tắc 2
 probability >= 0.8
-→ KIỂM TRA hệ thống
-🟢 Quy tắc 3 (Bình thường)
-probability < 0.8
-→ HOẠT ĐỘNG bình thường
-10. 📊 Nhật ký quyết định
+→ KIỂM TRA LÀM MÁT
 
-Ví dụ:
+Quy tắc 3
+Normal condition
+→ BÌNH THƯỜNG
 
-time	temp	prob	anomaly	decision
-10:01	-5°C	0.2	0.5	NORMAL
-10:05	3°C	0.85	1.2	CHECK
-10:10	8°C	0.9	3.0	STOP
-11. 🎯 Kết quả đạt được
+9. Kết quả đạt được
+Thông thống đã:
 
-✅ Xây dựng pipeline AIoT hoàn chỉnh
-✅ Huấn luyện AI thành công
-✅ Triển khai FastAPI hoạt động
-✅ Phát hiện bất thường chính xác
-✅ Tạo hệ thống cảnh báo thông minh
-✅ Ghi log phục vụ kiểm toán & phân tích
+Xây dựng hoàn thiện đường ống AIoT
+Huấn luyện mô hình AI thành công
+Triển khai API FastAPI
+Nhật ký quyết định của Sinh
+Phát hiện dị thường
+Tạo lớp an toàn cho kho lạnh
